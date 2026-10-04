@@ -11,8 +11,8 @@ public:
          const boost::asio::ip::address& chat_room,
          const std::string& nickname);
 
-    void do_receive();
-    void do_send();
+    boost::asio::awaitable<void> do_receive();
+    boost::asio::awaitable<void> do_send();
 
 private:
     constexpr static std::uint16_t chatty_port_ = 8000U;
