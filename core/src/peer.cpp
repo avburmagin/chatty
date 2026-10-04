@@ -7,6 +7,7 @@ Peer::Peer(boost::asio::io_context& io_context,
            const std::string& nickname)
     : socket_(io_context)
     , room_endpoint_(chat_room, chatty_port_)
+    , stdin_(io_context, ::dup(STDIN_FILENO))
     , nickname_(nickname)
 {
     socket_.open(room_endpoint_.protocol());
@@ -42,13 +43,24 @@ void Peer::do_receive(){
 void Peer::do_send(){
     std::string nickname = nickname_;
     std::string message;
-    std::getline(std::cin, message);
     std::string buffer = nickname.append(": " + message);
-    socket_.async_send_to(boost::asio::buffer(buffer, maximum_message_size_), room_endpoint_,
-                       [this, message](const boost::system::error_code& /*error_code*/, std::size_t bytes_sent){
-        std::cout << "You: " << message << std::endl;
-        std::cout << "";
-        do_send();
+    
+    boost::asio::async_read_until(stdin_, boost::asio::dynamic_buffer(sending_buffer_), '\n', [this](boost::system::error_code error_code, std::size_t n){
+        if (error_code.failed()) {
+            return;
+        }
+
+        socket_.async_send_to(boost::asio::buffer(nickname_ + ": " + sending_buffer_), room_endpoint_, [this](const boost::system::error_code& error_code, std::size_t){
+            if (error_code.failed()) {
+                return;
+            }
+
+            std::cout << "You sent: " << sending_buffer_ << '\n';
+
+            sending_buffer_.clear();
+
+            do_send();
+        });
     });
 }
 

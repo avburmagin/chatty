@@ -19,8 +19,10 @@ private:
     constexpr static std::size_t maximum_message_size_ = 128;
 
     std::array<char, 128> receiving_buffer_;
+    std::string sending_buffer_;
     std::string nickname_;
     boost::asio::ip::udp::socket socket_;
+    boost::asio::posix::stream_descriptor stdin_;
     boost::asio::ip::udp::endpoint remote_endpoint_;
     boost::asio::ip::udp::endpoint room_endpoint_;
 };
