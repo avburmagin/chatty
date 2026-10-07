@@ -8,9 +8,10 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 
 find_package(Boost)
 find_package(Threads)
+find_package(fmt REQUIRED)
 
 target_sources(${PROJECT_NAME} PRIVATE
     src/peer.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} Boost::boost Threads::Threads)
+target_link_libraries(${PROJECT_NAME} Boost::boost Threads::Threads fmt::fmt)
