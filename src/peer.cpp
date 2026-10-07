@@ -1,4 +1,4 @@
-#include "chatty/core/peer.h"
+#include "peer.h"
 
 namespace core {
 

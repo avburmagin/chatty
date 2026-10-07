@@ -4,12 +4,13 @@ project(chatty)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp)
 
 find_package(Boost)
 find_package(Threads)
 
-#target_link_libraries(${PROJECT_NAME} Boost::boost Threads::Threads)
+target_sources(${PROJECT_NAME} PRIVATE
+    src/peer.cpp
+)
 
-add_subdirectory(core)
-add_subdirectory(main)
+target_link_libraries(${PROJECT_NAME} Boost::boost Threads::Threads)
