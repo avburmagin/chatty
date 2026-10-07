@@ -1,0 +1,9 @@
+[requires]
+boost/1.91.0
+
+[options]
+boost/*:without_cobalt = True
+
+[generators]
+CMakeDeps
+CMakeToolchain
