@@ -1,5 +1,6 @@
 [requires]
 boost/1.91.0
+fmt/12.2.0
 
 [options]
 boost/*:without_cobalt = True
