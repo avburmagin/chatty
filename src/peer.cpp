@@ -2,12 +2,12 @@
 
 namespace core {
 
-Peer::Peer(boost::asio::io_context& io_context,
+Peer::Peer(boost::asio::strand& strand,
            const boost::asio::ip::address& chat_room,
            const std::string& nickname)
-    : socket_(io_context)
+    : socket_(strand)
     , room_endpoint_(chat_room, chatty_port_)
-    , stdin_(io_context, ::dup(STDIN_FILENO))
+    , stdin_(strand, ::dup(STDIN_FILENO))
     , nickname_(nickname)
 {
     socket_.open(room_endpoint_.protocol());
