@@ -2,12 +2,14 @@
 
 namespace core {
 
-Peer::Peer(boost::asio::strand& strand,
+Peer::Peer(boost::asio::strand<boost::asio::thread_pool::executor_type>& strand,
            const boost::asio::ip::address& chat_room,
            const std::string& nickname)
     : socket_(strand)
     , room_endpoint_(chat_room, chatty_port_)
+#ifndef _WIN64
     , stdin_(strand, ::dup(STDIN_FILENO))
+#endif
     , nickname_(nickname)
 {
     socket_.open(room_endpoint_.protocol());
@@ -35,6 +37,9 @@ boost::asio::awaitable<void> Peer::do_receive(){
 }
 
 boost::asio::awaitable<void> Peer::do_send() {
+#if defined(_WIN64)
+    
+#else 
     std::string nickname = nickname_;
     std::string message;
     std::string buffer = nickname.append(": " + message);
@@ -65,6 +70,7 @@ boost::asio::awaitable<void> Peer::do_send() {
 
         sending_buffer_.clear();
     }
+#endif
 }
 
 } // namespace core

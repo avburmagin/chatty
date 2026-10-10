@@ -7,7 +7,7 @@ namespace core {
 
 class Peer {
 public:
-    Peer(boost::asio::strand& strand,
+    Peer(boost::asio::strand<boost::asio::thread_pool::executor_type>& strand,
          const boost::asio::ip::address& chat_room,
          const std::string& nickname);
 
@@ -22,9 +22,7 @@ private:
     std::string sending_buffer_;
     std::string nickname_;
     boost::asio::ip::udp::socket socket_;
-#if defined(_WIN64)
-    boost::asio::windows::object_handle stdin_;
-#else 
+#ifndef _WIN64
     boost::asio::posix::stream_descriptor stdin_;
 #endif
     boost::asio::ip::udp::endpoint remote_endpoint_;
