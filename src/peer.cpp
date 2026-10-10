@@ -41,7 +41,7 @@ boost::asio::awaitable<void> Peer::do_receive(){
 
 boost::asio::awaitable<void> Peer::do_send() {
 #if defined(_WIN64)
-    
+    // TODO: implementation
 #else 
     const auto welcome_message = fmt::format("{} connected to the chat", nickname_);
 
