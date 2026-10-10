@@ -32,7 +32,7 @@ boost::asio::awaitable<void> Peer::do_receive(){
 
         const auto received_message = std::string{receiving_buffer_.begin(), receiving_buffer_.begin() + n};
 
-        if (received_message.find(nickname_) != 0) {
+        if (!received_message.starts_with(nickname_)) {
             std::cout.write(receiving_buffer_.data(), n);
             std::cout << '\n';
         }
