@@ -1,16 +1,19 @@
 #include "peer.h"
 
+#include <fmt/core.h>
+#include <fmt/format.h>
+
 namespace core {
 
 Peer::Peer(boost::asio::strand<boost::asio::thread_pool::executor_type>& strand,
            const boost::asio::ip::address& chat_room,
            const std::string& nickname)
-    : socket_(strand)
-    , room_endpoint_(chat_room, chatty_port_)
+    : socket_{strand}
+    , room_endpoint_{chat_room, chatty_port_}
 #ifndef _WIN64
-    , stdin_(strand, ::dup(STDIN_FILENO))
+    , stdin_{strand, ::dup(STDIN_FILENO)}
 #endif
-    , nickname_(nickname)
+    , nickname_{nickname}
 {
     socket_.open(room_endpoint_.protocol());
     socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
@@ -40,11 +43,7 @@ boost::asio::awaitable<void> Peer::do_send() {
 #if defined(_WIN64)
     
 #else 
-    std::string nickname = nickname_;
-    std::string message;
-    std::string buffer = nickname.append(": " + message);
-    
-    auto welcome_message = std::string(nickname_ + " connected to the chat");
+    const auto welcome_message = fmt::format("{} connected to the chat", nickname_);
 
     const auto [ec, n] = co_await socket_.async_send_to(boost::asio::buffer(welcome_message), room_endpoint_, boost::asio::as_tuple(boost::asio::use_awaitable));
     if (ec.failed()) {
@@ -52,7 +51,7 @@ boost::asio::awaitable<void> Peer::do_send() {
     }
 
     if (n > 0U) {
-        std::cout << "Entered chat room successfully" << '\n';
+        fmt::println("Entered chat room successfully");
     }
 
     while (true) {
@@ -61,12 +60,12 @@ boost::asio::awaitable<void> Peer::do_send() {
             co_return;
         }
         
-        const auto [ec1, n1] = co_await socket_.async_send_to(boost::asio::buffer(nickname_ + ": " + sending_buffer_), room_endpoint_, boost::asio::as_tuple(boost::asio::use_awaitable));
+        const auto [ec1, n1] = co_await socket_.async_send_to(boost::asio::buffer(fmt::format("{}: {}", nickname_, sending_buffer_)), room_endpoint_, boost::asio::as_tuple(boost::asio::use_awaitable));
         if (ec1.failed()) {
             co_return;
         }
         
-        std::cout << "You: " << sending_buffer_ << '\n';
+        fmt::print("You: {}", sending_buffer_);
 
         sending_buffer_.clear();
     }
