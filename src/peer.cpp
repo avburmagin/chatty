@@ -40,9 +40,6 @@ boost::asio::awaitable<void> Peer::do_receive(){
 }
 
 boost::asio::awaitable<void> Peer::do_send() {
-#if defined(_WIN64)
-    // TODO: implementation
-#else 
     const auto welcome_message = fmt::format("{} connected to the chat", nickname_);
 
     const auto [ec, n] = co_await socket_.async_send_to(boost::asio::buffer(welcome_message), room_endpoint_, boost::asio::as_tuple(boost::asio::use_awaitable));
@@ -55,21 +52,23 @@ boost::asio::awaitable<void> Peer::do_send() {
     }
 
     while (true) {
+#ifdef _WIN64
+        std::getline(std::cin, sending_buffer_);
+#else 
         const auto [ec, n] = co_await boost::asio::async_read_until(stdin_, boost::asio::dynamic_buffer(sending_buffer_), '\n', boost::asio::as_tuple(boost::asio::use_awaitable));
         if (ec.failed()) {
             co_return;
         }
-        
+#endif
         const auto [ec1, n1] = co_await socket_.async_send_to(boost::asio::buffer(fmt::format("{}: {}", nickname_, sending_buffer_)), room_endpoint_, boost::asio::as_tuple(boost::asio::use_awaitable));
         if (ec1.failed()) {
             co_return;
         }
-        
+
         fmt::print("You: {}", sending_buffer_);
 
         sending_buffer_.clear();
     }
-#endif
 }
 
 } // namespace core
